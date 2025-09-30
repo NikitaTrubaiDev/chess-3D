@@ -142,6 +142,9 @@ public class GameSceneState extends BaseAppState {
         normalizePrototype(bb); normalizePrototype(bq); normalizePrototype(bk);
 
         placeStartPosition();
+        // [ADD] проставить userData для уже стоящих фигур
+        indexExistingPieces();
+
 
         // ---------- Границы всей сцены ----------
         sceneNode.updateGeometricState();
@@ -249,4 +252,53 @@ public class GameSceneState extends BaseAppState {
         spawn(bk, 4, 7); spawn(bb, 5, 7); spawn(bn, 6, 7); spawn(br, 7, 7);
         for (int f = 0; f < 8; f++) spawn(bp, f, 6);
     }
+        // === [ADD] Преобразования доска↔мир + маркировка фигур ===
+
+    /** Публичный доступ к центру клетки в world-space. */
+    public Vector3f boardToWorld(int file, int rank) {
+        return squareToWorld(file, rank);
+    }
+
+    /** Перевод мировой точки в индексы клетки (к ближайшему центру), с ограничением [0..7]. */
+    public int[] worldToBoard(Vector3f worldPoint) {
+        int file, rank;
+        if (hasAnchors) {
+            Vector3f v = worldPoint.subtract(a1);
+            float u = v.dot(xAxis) / pitchX; // вдоль файлов A→H
+            float w = v.dot(yAxis) / pitchY; // вдоль рангов 1→8
+            file = Math.round(u);
+            rank = Math.round(w);
+        } else {
+            float x = worldPoint.x;
+            float z = worldPoint.z;
+            file = Math.round(x / squareSize + 3.5f);
+            rank = Math.round(z / squareSize + 3.5f);
+        }
+        if (file < 0) file = 0; if (file > 7) file = 7;
+        if (rank < 0) rank = 0; if (rank > 7) rank = 7;
+        return new int[]{file, rank};
+    }
+
+    /** Удобный размер клетки (для визуальных маркеров). */
+    public float getPitch() {
+        return hasAnchors ? Math.min(pitchX, pitchY) : squareSize;
+    }
+
+    /** Пометить фигуру как пикаемую и записать её клетку. */
+    public void registerPiece(Spatial piece, int file, int rank) {
+        if (piece == null) return;
+        piece.setUserData("isPiece", 1);
+        piece.setUserData("file", file);
+        piece.setUserData("rank", rank);
+    }
+
+    /** Проставить userData("isPiece"/"file"/"rank") всем уже стоящим на сцене фигурам. */
+    public void indexExistingPieces() {
+        if (piecesNode == null) return;
+        for (Spatial s : piecesNode.getChildren()) {
+            int[] fr = worldToBoard(s.getWorldTranslation());
+            registerPiece(s, fr[0], fr[1]);
+        }
+    }
+
 }

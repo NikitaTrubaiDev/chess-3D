@@ -28,6 +28,9 @@ public class App extends SimpleApplication {
         game = new GameSceneState(pivot);
         stateManager.attach(game);
 
+        stateManager.attach(new chess3d.view.PickingState());
+
+
         // 2) Свет — как раньше
         stateManager.attach(new LightingState());
 
