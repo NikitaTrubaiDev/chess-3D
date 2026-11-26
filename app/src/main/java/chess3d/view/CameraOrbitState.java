@@ -8,6 +8,7 @@ import com.jme3.input.InputManager;
 import com.jme3.input.MouseInput;
 import com.jme3.input.controls.AnalogListener;
 import com.jme3.input.controls.MouseAxisTrigger;
+import com.jme3.input.controls.MouseButtonTrigger;
 import com.jme3.math.FastMath;
 import com.jme3.renderer.Camera;
 import com.jme3.scene.Node;
@@ -49,6 +50,7 @@ public class CameraOrbitState extends BaseAppState {
 
         // создаём ChaseCamera, встроенный зум отключаем
         chaseCam = new ChaseCamera(cam, pivot, input);
+        chaseCam.setToggleRotationTrigger(new MouseButtonTrigger(MouseInput.BUTTON_RIGHT));
         chaseCam.setSmoothMotion(false);
         chaseCam.setRotationSpeed(5.0f);
         chaseCam.setZoomSensitivity(0f);   // свой зум
@@ -56,7 +58,7 @@ public class CameraOrbitState extends BaseAppState {
         chaseCam.setMinVerticalRotation(-FastMath.HALF_PI + 0.05f);
         chaseCam.setMaxVerticalRotation( FastMath.HALF_PI - 0.05f);
         chaseCam.setDefaultHorizontalRotation(0.25f * FastMath.PI);
-        chaseCam.setDefaultVerticalRotation(20f * FastMath.DEG_TO_RAD);
+        chaseCam.setDefaultVerticalRotation(50f * FastMath.DEG_TO_RAD);
 
         // дистанции
         chaseCam.setMinDistance(minDist);

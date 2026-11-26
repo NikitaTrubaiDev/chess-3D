@@ -1,5 +1,6 @@
 package chess3d.view;
 
+import chess3d.model.ChessGame;
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.BaseAppState;
@@ -32,6 +33,7 @@ public class GameSceneState extends BaseAppState {
     private static final String B_QUEEN  = "bqueen.glb";
     private static final String B_KING   = "bking.glb";
 
+    private final ChessGame initialGame = new ChessGame();
     private final Node pivot;                 // пивот орбитальной камеры (из App)
 
     private SimpleApplication sapp;
@@ -141,9 +143,7 @@ public class GameSceneState extends BaseAppState {
         normalizePrototype(bp); normalizePrototype(br); normalizePrototype(bn);
         normalizePrototype(bb); normalizePrototype(bq); normalizePrototype(bk);
 
-        placeStartPosition();
-        // [ADD] проставить userData для уже стоящих фигур
-        indexExistingPieces();
+        renderPosition(initialGame);
 
 
         // ---------- Границы всей сцены ----------
@@ -230,6 +230,26 @@ public class GameSceneState extends BaseAppState {
     }
 
 
+    public void renderPosition(ChessGame game) {
+        piecesNode.detachAllChildren();
+        for (int f = 0; f < 8; f++) for (int r = 0; r < 8; r++) {
+            ChessGame.Piece piece = game.pieceAt(f, r);
+            if (piece == null) continue;
+            boolean white = piece.color() == ChessGame.Color.WHITE;
+            Spatial model = switch (piece.type()) {
+                case PAWN -> white ? wp : bp;
+                case ROOK -> white ? wr : br;
+                case KNIGHT -> white ? wn : bn;
+                case BISHOP -> white ? wb : bb;
+                case QUEEN -> white ? wq : bq;
+                case KING -> white ? wk : bk;
+            };
+            spawn(model, f, r);
+        }
+        piecesNode.updateGeometricState();
+        indexExistingPieces();
+    }
+
     // Сброс локальных трансформов и центр по XZ (если origin уже в центре низа — можно убрать move)
     private void normalizePrototype(Spatial s) {
         if (s == null) return;
@@ -274,8 +294,7 @@ public class GameSceneState extends BaseAppState {
             file = Math.round(x / squareSize + 3.5f);
             rank = Math.round(z / squareSize + 3.5f);
         }
-        if (file < 0) file = 0; if (file > 7) file = 7;
-        if (rank < 0) rank = 0; if (rank > 7) rank = 7;
+        if (file < 0 || file > 7 || rank < 0 || rank > 7) return null;
         return new int[]{file, rank};
     }
 
