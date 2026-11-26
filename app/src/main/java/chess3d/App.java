@@ -19,7 +19,9 @@ public class App extends SimpleApplication {
     @Override
     public void simpleInitApp() {
         assetManager.registerLocator("assets", FileLocator.class);
-        viewPort.setBackgroundColor(ColorRGBA.White);
+        setDisplayFps(false);
+        setDisplayStatView(false);
+        viewPort.setBackgroundColor(new ColorRGBA(0.075f, 0.09f, 0.12f, 1f));
 
         var pivot = new com.jme3.scene.Node("pivot");
         rootNode.attachChild(pivot);

@@ -47,6 +47,7 @@ public class LightingState extends BaseAppState {
         root.removeLight(sun);
         root.removeLight(fill);
         root.removeLight(back);
+        root.removeLight(up);
         root.removeLight(ambient);
     }
 
